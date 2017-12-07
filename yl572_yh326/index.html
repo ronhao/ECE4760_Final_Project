@@ -79,8 +79,9 @@
     </a>
     <a href="index.html#home" class="w3-bar-item w3-button">HOME</a>
     <a href="index.html#intro" class="w3-bar-item w3-button w3-hide-small"><i class="fa fa-user"></i>INTRODUCTION</a>
-    <a href="https://www.w3schools.com/w3css/tryw3css_templates_parallax.htm#portfolio" class="w3-bar-item w3-button w3-hide-small"><i class="fa fa-th"></i> PORTFOLIO</a>
-    <a href="https://www.w3schools.com/w3css/tryw3css_templates_parallax.htm#contact" class="w3-bar-item w3-button w3-hide-small"><i class="fa fa-envelope"></i> CONTACT</a>
+    <a href="index.html#design" class="w3-bar-item w3-button w3-hide-small"><i class="fa fa-th"></i>DESIGN</a>
+    <a href="index.html#result" class="w3-bar-item w3-button w3-hide-small"><i class="fa fa-envelope"></i>RESULT</a>
+    <a href="index.html#result" class="w3-bar-item w3-button w3-hide-small"><i class="fa fa-envelope"></i>CONCLUSION</a>
     <a href="index.html#history" class="w3-bar-item w3-button">HISTORY</a>
     <a href="https://www.w3schools.com/w3css/tryw3css_templates_parallax.htm#" class="w3-bar-item w3-button w3-hide-small w3-right w3-hover-red">
       <i class="fa fa-search"></i>
@@ -108,7 +109,7 @@
 
 <!-- Container (History Section) -->
 <div class="w3-content w3-container w3-padding-64" id="intro">
-  <h3 class="w3-center">Introduction</h3>
+  <!-- <h3 class="w3-center">Introduction</h3> -->
   <div class="w3-row">
     <div class="w3-col m6 w3-padding-large">
     <p>
@@ -124,17 +125,152 @@
   <div class="w3-row">
     <div class="w3-col m6 w3-padding-large">
     <p>
-      <br>Nowadays gimbal can be used to held a camera to prevent the noise from handle 
+      <br>Nowadays a gimbal can be used to held a camera to prevent the input noise from affecting the recording. It's not just a purely mechanical system. Instead it uses a microcontroller to cancel the offset caused by the outside world. A gimbal system using a microcontroller can achieve 
     </p>
     </div>
     <div class="w3-col m6 w3-hide-small w3-padding-large">
-      <p><b><i class="fa fa-user w3-margin-right"></i>Samle Gimbal from Zhiyun-Tech</b></p><br>
+      <p><b><i class="fa fa-user w3-margin-right"></i>Gimbal from Zhiyun-Tech</b></p><br>
       <img src="zhiyunGimbal.jpg" class="w3-round w3-image" alt="acient gimbal" width="150" height="150">
+    </div>
+  </div>
+
+  <div class="w3-row">
+    <div class="w3-col m6 w3-padding-large">
+    <p>
+      <br>We think it is interesting to implement a gimbal system. It helps us to understand how to keep a system balanced at a fixed angle by actively reading the offset and then setting the control signal 
+    </p>
+    </div>
+    <div class="w3-col m6 w3-hide-small w3-padding-large">
+      <p><b><i class="fa fa-user w3-margin-right"></i>Gimbal Implemented</b></p><br>
+      <img src="true.jpeg" class="w3-round w3-image" alt="true" width="300" height="300">
     </div>
   </div>
 </div>
 
+<!-- Design -->
+<div class="bgimg-1 w3-display-container w3-opacity-min" id="design">
+  <div class="w3-display-middle">
+    <span class="w3-xxlarge w3-text-white w3-wide">DESIGN</span>
+  </div>
+</div>
+<div class="w3-content w3-container w3-padding-64">
+  <h3 class="w3-center">Hardware Components</h3>
+  <p>
+    Below is a list of all the necessary hardware parts to build this project:
+    <br>
+    <b>1</b>. PIC32 microcontroller x 1
+    <br>
+    <b>2</b>. L293D Quadruple Half-H Drivers x 1
+    <br>
+    <b>3</b>. uxcell DC 12V 200RPM 6mm Shaft High Torque Turbine Worm Geared Motor x 2
+    <br>
+    <b>4</b>. GY-61 Accelerometer x 1
+    <br>
+    Besides, you also need some laser cut, 3-D printed materials to setup the frameworks, and some resistors, capacitors, and wires to complete the circuit.
+  </p>
 
+  <br>
+  <h3 class="w3-center">Schematics</h3>
+  <div class="w3-center">
+    <img src="schematic.PNG" class="w3-round w3-image w3-center" alt="schematics">
+    <p class="w3-center"><b><i class="fa fa-user w3-center"></i></b>Figure 2</p>
+  </div>
+  <p>
+    The schematic in figure XXXXX shows how pins are connected. Pin 9, 10, 21 and 24 on the microcontroller are used to control two motors, and are passing into the 4 control pins of the H-bridge, 2 for each motors. Pin 3 reads output value of x-axis and pin 7 reads value of y-axis from the accelerometer. The enable bits for H-bridge are always set. The motors are powered by a 4.5V DC power supply, and the microcontroller is powered by a 9V DC power supply. The accelerometer is powered by a 3.3V voltage coming out from the microcontroller.
+  </p>
+  
+  <br>
+  <h3 class="w3-center">Software Design</h3>
+  <h4>Accelerometer Values Read</h4>
+  <p>
+    We used the code adapted from <a href="http://people.ece.cornell.edu/land/courses/ece4760/PIC32/ADC/ADC_setup_two_chan.c">ADC_setup_two_chan.c</a> to read ADC values using two channels. 
+    <br>
+    One problem in reading ADC values is that, the accelerometer is very sensitive, so a tiny force would cause a spike in the read, shown in \textit{Figure x}. This sensitiveness would cause the system highly unstable. When the motor starts to rotate, it gives the accelerometer a force which causes a spike. When being held by hand, the unsteadiness from hand causes spike, too. The spikes make the system to think the plane is rotating back and forth rapidly with large amplitude, so the motors will respond according to the spikes, causing severe jitter. To resolve this issue, we implement a temporal average filter which takes the average values of last x consecutive read values as the input signal. This feature wipes out the effects from spikes and stabilizes the system. The possible drawback of the filter is that the system is less sensitive to a real displacement. However, we are running the measuring thread with a very high frequency, so the system can still respond in a short time. 
+    <br>
+    We have also tried to use a counter to filter out the noise, but it turns out the counter filter performs worse than a temporal average filter.
+  </p>
+  <div class="w3-center">
+    <img src="spike.png" class="w3-round w3-image w3-center" alt="spike">
+    <p class="w3-center"><b><i class="fa fa-user w3-center"></i></b>Figure 1</p>
+  </div>
+
+  <h4>Motor Driver</h4>
+  <p>
+    We implement a simple motor driver code to control motors. Because we are using a H-bridge to control the rotating direction of motors, we need to set and clear bits for six pins, which consist of two enable pins and four control pins. Wrapping the control detail in a driver makes the code clean and readable.
+  </p>
+
+  <h4>Control Thread</h4>
+  <p id="100ms">
+    We uses ProtoThread to implement our control thread. The thread reads in two ADC values, filters the signal using a temporal average filter, and set the motor control signals accordingly. It compares the filtered values with the pre-set values (illustrated <a href="google.com">here</a>). If they are different, the thread will set the control signals of motors to rotate the plane back to horizontal state. 
+    <br>
+    A threshold value is set to tolerate a certain range of error because the accelerometer is sensitive and it is nearly impossible to keep the gimbal's head absolutely horizontal. The threshold value is chosen such that the machine will not jitter at steady point and the plane is still kept horizontal in human's perspective.
+    <br>
+    The thread runs at 20Hz, so the response time of gimbal should be 50 milliseconds. Because we use a temporal average filter which averages last three consecutive read values, the estimated response time should be within 50ms - 150ms.
+  </p>
+
+</div>
+<!-- End of Design -->
+
+<!-- Result -->
+<div class="bgimg-1 w3-display-container w3-opacity-min" id="result">
+  <div class="w3-display-middle">
+    <span class="w3-xxlarge w3-text-white w3-wide">RESULT</span>
+  </div>
+</div>
+
+<div class="w3-content w3-container w3-padding-64">
+  <h3 class="w3-center">Demo Video</h3>
+  <div class="w3-center">
+    <embed src="demo.mp4" autostart="false" height="500" width="500" />
+  </div>
+
+  <h3 class="w3-center">Response Time</h3>
+  The actual set time is hard to measure because moving the handle takes time and the gimbal will start calibrating the head as soon as the handle starts moving. Theoretically, the response time is around <a href="index.html#100ms">100ms</a>. By observation, the calibration happens in real-time.
+
+  <h3 class="w3-center">Accuracy</h3>
+  <h4>In general</h4>
+  <p>Our two-axes gimbal can keep the head horizontal as expected. When the handle is moved or rotated, the motors will rotate in the head (plane) in X- and Y-axis to keep it horizontal. In most of the cases, the head can go back to horizontal state in a short time. As shown in <i>figure 1</i>, at first the plane stays horizontal, and then the handle is moved. The read value goes back to the original value after a short time, indicating the plane moves back to horizontal state.
+  </p>
+  <div class="w3-center">
+    <img src="goBack.png" class="w3-round w3-image w3-center" alt="acient gimbal">
+    <p class="w3-center"><b><i class="fa fa-user w3-center"></i></b>Figure 1</p>
+  </div>
+
+  <h4>Jitter</h4>
+  <p>
+    Some times the head will jitter after going back to horizontal place. <i>Figure 2</i> shows the accelerometer read value in this situation.
+    <div class="w3-center">
+      <img src="jitter.png" class="w3-round w3-image w3-center" alt="acient gimbal">
+      <p class="w3-center"><b><i class="fa fa-user w3-center"></i></b>Figure 2</p>
+    </div>
+    <br>We discussed with professor and camp up with several possible reasons:
+    <br><b>1</b>. Our hand is not steady: we cannot keep our hand perfectly steady, so it is possible that our hand cause the ADC read value to fluctuate around the threshold value, and the gimbal is balancing itself intermittently. However, because we are using a temporal average number to filter out the noise (mentioned in software design), this case is unlikely.
+    <br><b>2</b>. Motors are glitched. The motors we use are gear motors. Because we have applied torque that is larger than the maximum allowed value on the motors, it is possible that the gears are damaged. We have observed that jitter only happens on the motor rotating in Y-axis and only happens when the motor rotates anti-clockwise. Therefore, it is very likely that the jitter is caused by mechanical issue.
+  </p>
+
+  <h4>Overshoot</h4>
+  <p>Besides the jitter, it is observed that sometimes the head will overshoot, which is shown by the figure x</p>. In the example the overshoot value is 96mV, corresponding to around 30 degrees, which is not a negligible quantity.
+  <div class="w3-center">
+    <img src="overshoot.png" class="w3-round w3-image w3-center" alt="overshoot">
+    <p class="w3-center"><b><i class="fa fa-user w3-center"></i></b>Figure 2</p>
+  </div>
+  <p>
+    There are three possible reasons. 
+    <br>
+    <b>1</b>. Our frequency of reading ADC values is not high enough, so the motors do not stop when it reaches the horizontal state because the read value is still the old value. However this case is unlikely because our yield time for the thread is only 50 millisecond, fast enough in our case.
+    <br>
+    <b>2</b>. The motors are rotating so fast that it is possible to overshoot the threshold range in 50 millisecond. To test this hypothesis, we modified our code and let motors rotate for only 50 milliseconds. By reading the difference in ADC output we conclude that this is not the reason in our case. 
+    <br>
+    <b>3</b>. we used a temporal average filter to filter out the noise. The drawback brought by the filter is that when the plane reaches the horizontal state, the filtered read value from ADC is still off the steady value, because we are taking the average of last three consecutive read values. Therefore, the motors will go a little bit further and go back. If the overshoot is not cause by mechanical issues, this is the most possible reason. The possible improvement will be discussed in XXXX section.
+  </p>
+
+
+</div>
+
+<div class="w3-content w3-container w3-padding-64" id="conclusion">
+  <h3 class="w3-center">Conclusion</h3>
+  
+</div>
 
 
 
